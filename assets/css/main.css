@@ -1,0 +1,35 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.user-registration-section .form-elements-container {
+  display: flex;
+  flex-direction: row;
+  min-width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.user-registration-section .form-elements-container .form-element {
+  width: 85%;
+  padding: 20px 20px 0px 0px;
+}
+
+.user-registration-section .form-elements-container .form-radio {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+}
+
+.user-registration-section .form-elements-container .form-radio label {
+  margin-right: 20px;
+}
+
+.submit-btn {
+  width: 250px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
