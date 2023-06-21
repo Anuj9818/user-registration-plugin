@@ -5,7 +5,7 @@ class User_registration_design
   function __construct()
   {
     //Create User Registration Page 
-    $this->create_registration_page();
+    $this->create_registration_form_bio_page();
 
     //Add Post States for User Registration Page
     add_filter('display_post_states', array($this, 'user_registration_post_state'), 10, 2);
@@ -14,8 +14,8 @@ class User_registration_design
     add_action('wp_enqueue_scripts', array($this, 'user_registration_styles'));
 
   }
-  /* Auto create a User Registration Form On Plugin Activation */
-  public function create_registration_page()
+  /* Auto create a User Registration Form Bio Page after Login/Register On Plugin Activation */
+  public function create_registration_form_bio_page()
   {
     $page_slug = 'user-registration-page'; // Slug of the Post
     $page_content = '
@@ -78,6 +78,10 @@ class User_registration_design
 
           <h3>Educational Background</h3>
           <div class="form-elements-container">
+
+            <div class="form-element form-group">
+              <textarea placeholder="Enter your education background..." class="form-control" name="education" rows="4" cols="50"></textarea>
+            </div>
 
             <div class="form-element form-group">
               <input class="btn btn-warning submit-btn" type="submit" name="Submit">

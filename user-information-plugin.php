@@ -7,7 +7,7 @@
 * Requires PHP:      7.2
 * Author:            ANUJ SHRESTHA
 * License:           GPL v2 or later
-* Text Domain:       user information plugin
+* Text Domain:       user-information-plugin
 This plugin gives you facility to store additional information about user that wordpress by default does not provide.
 */
 

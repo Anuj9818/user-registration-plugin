@@ -9,7 +9,7 @@ class User_registration_process
 
     //Register Custom Taxonomy
     add_action('init', array($this, 'register_custom_taxonomy'));
-    // $this->register_custom_taxonomy();
+
   }
 
   //Register Custom Post Type User Bio
