@@ -123,36 +123,20 @@ class User_registration_design
           <h3>Personal Information</h3>
           <div class="form-elements-container">
             <div class="form-element form-group">
-              <input type="text" class="form-control" name="name" placeholder="Enter your Full Name" required>
+              <input type="text" class="form-control" name="name" id="name" placeholder="Enter your Full Name" required>
             </div>
             <div class="form-element form-group">
-              <input type="text" class="form-control" name="address" placeholder="Enter your Address" required>
+              <input type="text" class="form-control" name="address" id="address" placeholder="Enter your Address" required>
             </div>                
             <div class="form-element form-group">
-              <input type="text" class="form-control" name="phone" minlength="10" placeholder="Enter your Contact Number" required>
+              <input type="text" class="form-control" name="phone" id="phone" maxlength="10" placeholder="Enter your Contact Number" required>
             </div>
-            <div class="form-element form-group" style="height: 70px;">
-              <p>Select your Gender</p>
-
-              <div class="form-radio">
-                <input type="radio" id="html" name="gender" value="male" checked>
-                <label for="html">Male</label><br>
-                
-                <input type="radio" id="css" name="gender" value="female">
-                <label for="css">Female</label><br>
-                
-                <input type="radio" id="javascript" name="gender" value="other">
-                <label for="javascript">Others</label>
-              </div>
-            
+            <div class="form-element form-group">
+              <input type="email" class="form-control" name="email" id="email" placeholder="Enter your Mail Address" required>
             </div>
 
             <div class="form-element form-group">
-              <input type="email" class="form-control" name="email" placeholder="Enter your Mail Address" required>
-            </div>
-
-            <div class="form-element form-group">
-              <textarea placeholder="Something about yourself..." class="form-control" name="about" rows="4" cols="50"></textarea>
+              <textarea id="about" placeholder="Something about yourself..." class="form-control" name="about" rows="4" cols="50"></textarea>
             </div> 
 
           </div><br>
@@ -161,19 +145,26 @@ class User_registration_design
           <div class="form-elements-container">
             <div class="form-element form-group" style="height:60px;">
 
-              <select name="cars" id="cars" class="form-control">
+              <select name="occupation" id="occupation" class="form-control">
                 <option value="">Select your Occupation Type</option>';
     $terms = get_terms(['occupation_type', 'hide_empty' => false]);
     foreach ($terms as $term):
-      if ($term->slug != 'uncategorized' && $term->slug != 'twentytwentytwo')
+      if ($term->slug != 'uncategorized' && $term->slug != 'twentytwentytwo') {
+        $term_children = get_term_children($term->term_id, 'occupation_type');
         $page_content .= '<option value="' . $term->slug . '">' . $term->name . '</option>';
+        if (!empty($term_children) && !is_wp_error($term_children)) {
+          foreach ($term_children as $child):
+            $page_content .= '<option value="' . $child->slug . '">' . $child->name . '</option>';
+          endforeach;
+        }
+      }
     endforeach;
     $page_content .= '
               </select>
             </div>
 
             <div class="form-element form-group">
-              <input class="form-control" type="number" name="years of experience" min="1"  max="15" placeholder="Total Years of Experience" required>
+              <input class="form-control" type="number" id="years_of_experience" name="years_of_experience" min="1"  max="15" placeholder="Total Years of Experience" required>
             </div>
           
           </div>
@@ -182,7 +173,7 @@ class User_registration_design
           <div class="form-elements-container">
 
             <div class="form-element form-group">
-              <textarea placeholder="Enter your education background..." class="form-control" name="education" rows="4" cols="50"></textarea>
+              <textarea id="education" placeholder="Enter your education background..." class="form-control" name="education" rows="4" cols="50"></textarea>
             </div>
 
             <div class="form-element form-group">
@@ -204,19 +195,19 @@ class User_registration_design
 
     if (!get_page_by_path($page_slug, OBJECT, 'page')) { // Check If Page Not Exits
       $new_page_id = wp_insert_post($new_page);
+    } else {
+      $created_page = get_page_by_path($page_slug);
+      $update_post = array(
+        'ID' => $created_page->ID,
+        'post_content' => $page_content,
+      );
+
+      // Update the post into the database
+      wp_update_post($update_post);
+
     }
-    // else {
-    //   $created_page = get_page_by_path($page_slug);
-    //   $update_post = array(
-    //     'ID' => $created_page->ID,
-    //     'post_content' => $page_content,
-    //   );
-
-    //   // Update the post into the database
-    //   wp_update_post($update_post);
-
-    // }
   }
+
 
   /*Set Post State to User Registration Form For Differenciation */
   function user_registration_post_state($post_states, $post)

@@ -1,4 +1,4 @@
-console.log(ajax_url);
+// console.log(ajax_url);
 /*---------------------------------Login & Registration Form JS---------------------------------------------------------*/
 //Disable Submit
 $('.register-submit').attr('disabled', 'disabled');
@@ -82,7 +82,37 @@ $("#user_registration_form").submit(function (event) {
 //User Bio Form Submission
 $("#user_registration_bio_form").submit(function (event) {
   event.preventDefault();
-  alert("Registration Bio Form Submitted");
+  var name = $('#name').val();
+  var address = $('#address').val();
+  var phone = $('#phone').val();
+  var email = $('#email').val();
+  var about = $('#about').val();
+  var occupation = $('#occupation').val();
+  var experience = $('#years_of_experience').val();
+  var education = $('#education').val();
+  var nonce_check = $('#register-bio-form-nonce').val();
+  $.ajax({
+    type: "post",
+    url: ajax_url[0],
+    data: {
+      action: 'registration_bio_form_submit_function',
+      name: name,
+      email: email,
+      address: address,
+      phone: phone,
+      about: about,
+      occupation: occupation,
+      experience: experience,
+      education: education,
+      nonce_check: nonce_check
+    },
+    error: function (err) {
+      console.log(err);
+    },
+    success: function (response) {
+      console.log(response);
+    },
+  });
 });
 
 //User Registration Form Password Check

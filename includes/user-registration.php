@@ -4,6 +4,9 @@ class User_registration_process
 {
   function __construct()
   {
+    //Admin Styles & Scripts Enqueue
+    add_action('admin_enqueue_scripts', array($this, 'urf_admin_styles_scripts'));
+
     // Create Custom Post Type: User Bio
     add_action('init', array($this, 'urf_create_post_type'));
 
@@ -21,9 +24,30 @@ class User_registration_process
     add_action('wp_ajax_registration_submit_function', array($this, 'registration_submit_function'));
     add_action('wp_ajax_nopriv_registration_submit_function', array($this, 'registration_submit_function'));
 
+    //Add custom meta box to the Post Type
+    add_action('add_meta_boxes', array($this, 'add_user_fields_meta_box'));
+    //Save Metafields Value
+    add_action('save_post', array($this, 'save_user_meta_box_fields'));
+
+    //AJAX Registration Form Submit
+    add_action('wp_ajax_registration_bio_form_submit_function', array($this, 'registration_bio_form_submit_function'));
+    add_action('wp_ajax_nopriv_registration_bio_form_submit_function', array($this, 'registration_bio_form_submit_function'));
+
+    //Add Additional Option Under CPT Menu called User Bio List
+    add_action('admin_menu', array($this, 'user_bio_list_panel'));
+
   }
 
-  //Register Custom Post Type User Bio
+  /*Styles and Scripts for Dashboard Admin Page*/
+  public function urf_admin_styles_scripts()
+  {
+    if (isset($_GET['page']) && isset($_GET['post_type'])) {
+      if ($_GET['page'] == 'user-bio-list' && $_GET['post_type'] == 'user_bio')
+        wp_enqueue_style('urf-admin-css', URF_PLUGIN_URL . 'assets/css/admin-css.css');
+    }
+  }
+
+  /*Register Custom Post Type User Bio*/
   public function urf_create_post_type()
   {
     $labels = array(
@@ -66,7 +90,7 @@ class User_registration_process
     register_post_type('user_bio', $args);
   }
 
-  //Register Custom Taxonomy
+  /*Register Custom Taxonomy*/
   public function register_custom_taxonomy()
   {
     //Regestering Custom Taxonomy 
@@ -96,7 +120,7 @@ class User_registration_process
     register_taxonomy('occupation_type', array('user_bio'), $args);
   }
 
-  //Dashboard Access Denial
+  /*Dashboard Access Denial*/
   public function dashboard_access_denial()
   {
     if (is_admin() && !defined('DOING_AJAX') && (current_user_can('subscriber') || current_user_can('contributor'))) {
@@ -105,7 +129,7 @@ class User_registration_process
     }
   }
 
-  //AJAX Login Form Submit
+  /*AJAX Login Form Submit*/
   public function login_submit_function()
   {
     global $user_ID;
@@ -126,7 +150,7 @@ class User_registration_process
     wp_die();
   }
 
-  //AJAX Registration Form Submit
+  /*AJAX Registration Form Submit*/
   public function registration_submit_function()
   {
     $username = sanitize_user($_POST['email']);
@@ -183,6 +207,110 @@ class User_registration_process
     wp_die();
   }
 
+  /*Adding User Post Metafields*/
+  public function add_user_fields_meta_box()
+  {
+    add_meta_box(
+      'user_fields_meta_box',
+      'Additional User Information',
+      array($this, 'show_user_fields_meta_box'),
+      'user_bio',
+      'normal',
+      'high'
+    );
+  }
+
+  /*Showing Metafields on User Post Posttype Screen*/
+  public function show_user_fields_meta_box($post)
+  {
+    include(URF_PLUGIN_PATH . '/includes/meta-box/meta-box-layout.php');
+  }
+
+  /*Save Metabox Data to its respective field*/
+  public function save_user_meta_box_fields($post_id)
+  {
+    //Check Autosave
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+      return $post_id;
+    }
+    //Check for Revisons
+    if ($parent_id = wp_is_post_revision($post_id)) {
+      $post_id = $parent_id;
+    }
+
+    $post_meta = get_post_meta($post_id);
+
+    if ($_POST['name'] && $_POST['name'] !== $post_meta['name'][0]) {
+      update_post_meta($post_id, 'name', $_POST['name']);
+    } elseif ('' === $_POST['name'] && $post_meta['name'][0]) {
+      delete_post_meta($post_id, 'name', $post_meta['name'][0]);
+    }
+
+    if ($_POST['address'] && $_POST['address'] !== $post_meta['address'][0]) {
+      update_post_meta($post_id, 'address', $_POST['address']);
+    } elseif ('' === $_POST['address'] && $post_meta['address'][0]) {
+      delete_post_meta($post_id, 'address', $post_meta['address'][0]);
+    }
+
+    if ($_POST['phone'] && $_POST['phone'] !== $post_meta['phone'][0]) {
+      update_post_meta($post_id, 'phone', $_POST['phone']);
+    } elseif ('' === $_POST['phone'] && $post_meta['phone'][0]) {
+      delete_post_meta($post_id, 'phone', $post_meta['phone'][0]);
+    }
+
+    if ($_POST['email'] && $_POST['email'] !== $post_meta['email'][0]) {
+      update_post_meta($post_id, 'email', $_POST['email']);
+    } elseif ('' === $_POST['email'] && $post_meta['email'][0]) {
+      delete_post_meta($post_id, 'email', $post_meta['email'][0]);
+    }
+
+    if ($_POST['about'] && $_POST['about'] !== $post_meta['about'][0]) {
+      update_post_meta($post_id, 'about', $_POST['about']);
+    } elseif ('' === $_POST['about'] && $post_meta['about'][0]) {
+      delete_post_meta($post_id, 'about', $post_meta['about'][0]);
+    }
+
+    if ($_POST['years_of_experience'] && $_POST['years_of_experience'] !== $post_meta['years_of_experience'][0]) {
+      update_post_meta($post_id, 'years_of_experience', $_POST['years_of_experience']);
+    } elseif ('' === $_POST['years_of_experience'] && $post_meta['years_of_experience'][0]) {
+      delete_post_meta($post_id, 'years_of_experience', $post_meta['years_of_experience'][0]);
+    }
+
+    if ($_POST['education'] && $_POST['education'] !== $post_meta['education'][0]) {
+      update_post_meta($post_id, 'education', $_POST['education']);
+    } elseif ('' === $_POST['education'] && $post_meta['education'][0]) {
+      delete_post_meta($post_id, 'education', $post_meta['education'][0]);
+    }
+  }
+
+  /*Registration Bio Form Sumbit*/
+  public function registration_bio_form_submit_function()
+  {
+    $curr_user_id = get_current_user_id();
+    $user_login = get_user_meta($curr_user_id);
+    echo $user_login['nickname'][0];
+    print_r($_POST);
+    wp_die();
+  }
+
+  /*User Bio List Panel to Backend */
+  public function user_bio_list_panel()
+  {
+    add_submenu_page(
+      'edit.php?post_type=user_bio',
+      'User Bio List',
+      'User Bio List',
+      'manage_options',
+      'user-bio-list',
+      array($this, 'user_bio_list_function'), // $callback
+    );
+  }
+
+  /*User Bio List Panel Callback */
+  public function user_bio_list_function()
+  {
+    include(URF_PLUGIN_PATH . '/includes/template-parts/user-bio-table.php');
+  }
 }
 
 new User_registration_process;
