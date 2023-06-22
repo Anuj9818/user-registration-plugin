@@ -17,23 +17,23 @@ if (!function_exists('add_action')) {
 }
 
 //On Plugin Activation
-function activation()
+function user_information_plugin_activation()
 {
   user_information_plugin_before_setup(); //Call plugin setup function 
   flush_rewrite_rules(); //When the user activates and deactivates the changes associated are performbed 
 
 }
-register_activation_hook(__FILE__, 'activation');
+register_activation_hook(__FILE__, 'user_information_plugin_activation');
 
 
 //On Plugin Deactication
-function deactivation()
+function user_information_plugin_deactivation()
 {
 
   flush_rewrite_rules(); //Flush Rewrite Rules
 
 }
-register_deactivation_hook(__FILE__, 'deactivation');
+register_deactivation_hook(__FILE__, 'user_information_plugin_deactivation');
 
 function user_information_plugin_before_setup()
 {
