@@ -3,6 +3,26 @@
   margin: 30px 0;
 }
 
+.table-header {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.table-header .filter-select {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 50%;
+}
+
+.table-header .filter-select select#status-filter {
+  width: 160px;
+}
+
+.table-section .table-header h1 {
+  width: 50%;
+}
+
 .table-section .heading-banner {
   padding: 0px 35px 0 10px;
   display: flex;
@@ -11,7 +31,7 @@
 .styled-table {
   border-collapse: collapse;
   margin: 25px 0;
-  font-size: 0.9em;
+  font-size: 13px;
   min-width: 100%;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
@@ -48,7 +68,7 @@
 .styled-table tbody td .csv-download {
   background: #262758;
   height: 36px;
-  width: 120px;
+  width: 100px;
   color: #ffffff;
   font-weight: 600;
   border: none;
@@ -57,5 +77,5 @@
 }
 
 #wpbody-content {
-  width: 90% !important;
+  width: 98% !important;
 }

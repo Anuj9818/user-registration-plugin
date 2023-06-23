@@ -25,6 +25,7 @@ class User_registration_design
   public function create_login_form()
   {
     $page_slug = 'urf-user-login-form-page'; // Slug of the Post
+    $page_content = "";
     if (isset($_GET['login_check'])) {
       if ($_GET['login_check'] == 'no') {
         $page_content = '
@@ -116,6 +117,8 @@ class User_registration_design
   public function create_registration_form_bio_page()
   {
     $page_slug = 'urf-user-registration-bio-page'; // Slug of the Post
+    $current_date = date('Y-m-d');
+
     $page_content = '
       <div class="user-registration-bio-section">
         <form action="' . esc_url(home_url('/')) . '" autocomplete="off" method="post"
@@ -131,12 +134,9 @@ class User_registration_design
             <div class="form-element form-group">
               <input type="text" class="form-control" name="phone" id="phone" maxlength="10" placeholder="Enter your Contact Number" required>
             </div>
-            <div class="form-element form-group">
-              <input type="email" class="form-control" name="email" id="email" placeholder="Enter your Mail Address" required>
-            </div>
 
             <div class="form-element form-group">
-              <textarea id="about" placeholder="Something about yourself..." class="form-control" name="about" rows="4" cols="50"></textarea>
+              <textarea id="about" placeholder="Something about yourself..." class="form-control" name="about" rows="4" cols="50" required></textarea>
             </div> 
 
           </div><br>
@@ -145,20 +145,22 @@ class User_registration_design
           <div class="form-elements-container">
             <div class="form-element form-group" style="height:60px;">
 
-              <select name="occupation" id="occupation" class="form-control">
+              <select name="occupation" id="occupation" class="form-control" required>
                 <option value="">Select your Occupation Type</option>';
     $terms = get_terms(['occupation_type', 'hide_empty' => false]);
-    foreach ($terms as $term):
-      if ($term->slug != 'uncategorized' && $term->slug != 'twentytwentytwo') {
-        $term_children = get_term_children($term->term_id, 'occupation_type');
-        $page_content .= '<option value="' . $term->slug . '">' . $term->name . '</option>';
-        if (!empty($term_children) && !is_wp_error($term_children)) {
-          foreach ($term_children as $child):
-            $page_content .= '<option value="' . $child->slug . '">' . $child->name . '</option>';
-          endforeach;
+    if (!empty($terms)) {
+      foreach ($terms as $term):
+        if ($term->taxonomy == 'occupation_type') {
+          $term_children = get_term_children($term->term_id, 'occupation_type');
+          $page_content .= '<option value="' . $term->slug . '">' . $term->name . '</option>';
+          if (!empty($term_children) && !is_wp_error($term_children)) {
+            foreach ($term_children as $child):
+              $page_content .= '<option value="' . $child->slug . '">' . $child->name . '</option>';
+            endforeach;
+          }
         }
-      }
-    endforeach;
+      endforeach;
+    }
     $page_content .= '
               </select>
             </div>
@@ -173,11 +175,12 @@ class User_registration_design
           <div class="form-elements-container">
 
             <div class="form-element form-group">
-              <textarea id="education" placeholder="Enter your education background..." class="form-control" name="education" rows="4" cols="50"></textarea>
+              <textarea id="education" placeholder="Enter your education background..." class="form-control" name="education" rows="4" cols="50" required></textarea>
             </div>
 
             <div class="form-element form-group">
               <input id="register-bio-form-nonce" type="hidden" name="ajax_nonce" value="' . wp_create_nonce('ajax_nocne_value') . '">
+              <input id="bio-submit-date" type="hidden" name="bio-submit-date"  value="' . $current_date . '">
               <input name="bio-submit" class="btn btn-warning submit-btn" type="submit" name="Submit">
             </div>
 
@@ -195,19 +198,19 @@ class User_registration_design
 
     if (!get_page_by_path($page_slug, OBJECT, 'page')) { // Check If Page Not Exits
       $new_page_id = wp_insert_post($new_page);
-    } else {
-      $created_page = get_page_by_path($page_slug);
-      $update_post = array(
-        'ID' => $created_page->ID,
-        'post_content' => $page_content,
-      );
-
-      // Update the post into the database
-      wp_update_post($update_post);
-
     }
-  }
+    // else {
+    //   $created_page = get_page_by_path($page_slug);
+    //   $update_post = array(
+    //     'ID' => $created_page->ID,
+    //     'post_content' => $page_content,
+    //   );
 
+    //   // Update the post into the database
+    //   wp_update_post($update_post);
+
+    // }
+  }
 
   /*Set Post State to User Registration Form For Differenciation */
   function user_registration_post_state($post_states, $post)

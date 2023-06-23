@@ -11,7 +11,7 @@ class User_registration_process
     add_action('init', array($this, 'urf_create_post_type'));
 
     //Register Custom Taxonomy
-    add_action('init', array($this, 'register_custom_taxonomy'));
+    add_action('init', array($this, 'urf_register_custom_taxonomy'));
 
     //Deny Access To Dashboard Accept Admin
     add_action('init', array($this, 'dashboard_access_denial'));
@@ -29,12 +29,20 @@ class User_registration_process
     //Save Metafields Value
     add_action('save_post', array($this, 'save_user_meta_box_fields'));
 
-    //AJAX Registration Form Submit
+    //AJAX Registration Bio Form Submit
     add_action('wp_ajax_registration_bio_form_submit_function', array($this, 'registration_bio_form_submit_function'));
     add_action('wp_ajax_nopriv_registration_bio_form_submit_function', array($this, 'registration_bio_form_submit_function'));
 
     //Add Additional Option Under CPT Menu called User Bio List
     add_action('admin_menu', array($this, 'user_bio_list_panel'));
+
+    //AJAX CSV Export Function
+    add_action('wp_ajax_filter_user_data', array($this, 'filter_user_data'));
+    add_action('wp_ajax_nopriv_filter_user_data', array($this, 'filter_user_data'));
+
+    //AJAX CSV Export Function
+    add_action('wp_ajax_user_csv_export', array($this, 'user_csv_export'));
+    add_action('wp_ajax_nopriv_user_csv_export', array($this, 'user_csv_export'));
 
   }
 
@@ -42,8 +50,14 @@ class User_registration_process
   public function urf_admin_styles_scripts()
   {
     if (isset($_GET['page']) && isset($_GET['post_type'])) {
-      if ($_GET['page'] == 'user-bio-list' && $_GET['post_type'] == 'user_bio')
+      if ($_GET['page'] == 'user-bio-list' && $_GET['post_type'] == 'user_bio') {
         wp_enqueue_style('urf-admin-css', URF_PLUGIN_URL . 'assets/css/admin-css.css');
+
+        $ajax_url = admin_url('admin-ajax.php');
+        wp_enqueue_script('urf-jQuery', URF_PLUGIN_URL . '/assets/js/custom-jquery.js', array(), '3.6.4', true);
+        wp_enqueue_script('urf-admin-js', URF_PLUGIN_URL . '/assets/js/admin-js.js', array('urf-jQuery'), '1.0', true);
+        wp_localize_script('urf-admin-js', 'ajax_url', array($ajax_url, site_url()));
+      }
     }
   }
 
@@ -91,7 +105,7 @@ class User_registration_process
   }
 
   /*Register Custom Taxonomy*/
-  public function register_custom_taxonomy()
+  public function urf_register_custom_taxonomy()
   {
     //Regestering Custom Taxonomy 
     $labels = array(
@@ -114,7 +128,7 @@ class User_registration_process
       'show_ui' => true,
       'show_admin_column' => true,
       'query_var' => true,
-      'rewrite' => array('slug' => 'occupation_type'),
+      'rewrite' => array('slug' => 'occupation'),
     );
 
     register_taxonomy('occupation_type', array('user_bio'), $args);
@@ -155,7 +169,8 @@ class User_registration_process
   {
     $username = sanitize_user($_POST['email']);
     if (!username_exists($username)) {
-      //Create  User 
+
+      //Create New User 
       $user_id = wp_create_user($_POST['email'], $_POST['password'], $_POST['email']);
       $user = new WP_User($user_id);
       $user->set_role('subscriber');
@@ -188,6 +203,7 @@ class User_registration_process
       }
 
     } else {
+      //Redirect to User Bio Page for Already existing Users
       global $user_ID;
       global $wpdb;
       $username = $wpdb->escape($_POST['email']);
@@ -240,6 +256,12 @@ class User_registration_process
 
     $post_meta = get_post_meta($post_id);
 
+    if ($_POST['submit_date'] && $_POST['submit_date'] !== $post_meta['submit_date'][0]) {
+      update_post_meta($post_id, 'submit_date', $_POST['submit_date']);
+    } elseif ('' === $_POST['submit_date'] && $post_meta['submit_date'][0]) {
+      delete_post_meta($post_id, 'submit_date', $post_meta['submit_date'][0]);
+    }
+
     if ($_POST['name'] && $_POST['name'] !== $post_meta['name'][0]) {
       update_post_meta($post_id, 'name', $_POST['name']);
     } elseif ('' === $_POST['name'] && $post_meta['name'][0]) {
@@ -270,10 +292,10 @@ class User_registration_process
       delete_post_meta($post_id, 'about', $post_meta['about'][0]);
     }
 
-    if ($_POST['years_of_experience'] && $_POST['years_of_experience'] !== $post_meta['years_of_experience'][0]) {
-      update_post_meta($post_id, 'years_of_experience', $_POST['years_of_experience']);
-    } elseif ('' === $_POST['years_of_experience'] && $post_meta['years_of_experience'][0]) {
-      delete_post_meta($post_id, 'years_of_experience', $post_meta['years_of_experience'][0]);
+    if ($_POST['experience'] && $_POST['experience'] !== $post_meta['experience'][0]) {
+      update_post_meta($post_id, 'experience', $_POST['experience']);
+    } elseif ('' === $_POST['experience'] && $post_meta['experience'][0]) {
+      delete_post_meta($post_id, 'experience', $post_meta['experience'][0]);
     }
 
     if ($_POST['education'] && $_POST['education'] !== $post_meta['education'][0]) {
@@ -283,13 +305,32 @@ class User_registration_process
     }
   }
 
-  /*Registration Bio Form Sumbit*/
+  /*AJAX Registration Bio Form Sumbit*/
   public function registration_bio_form_submit_function()
   {
     $curr_user_id = get_current_user_id();
     $user_login = get_user_meta($curr_user_id);
-    echo $user_login['nickname'][0];
+
+    //Get User Post ID by Current User Email/Nickname
+    $user_post = get_page_by_title($user_login['nickname'][0], OBJECT, 'user_bio');
+    echo $user_post->ID;
+
+    //Update Related Post's Meta
+    update_post_meta($user_post->ID, 'submit_date', $_POST['submit_date']);
+    update_post_meta($user_post->ID, 'name', $_POST['name']);
+    update_post_meta($user_post->ID, 'address', $_POST['address']);
+    update_post_meta($user_post->ID, 'phone', $_POST['phone']);
+    update_post_meta($user_post->ID, 'about', $_POST['about']);
+    update_post_meta($user_post->ID, 'occupation', $_POST['occupation']);
+    update_post_meta($user_post->ID, 'experience', $_POST['experience']);
+    update_post_meta($user_post->ID, 'education', $_POST['education']);
+
+    // Get term by name 
+    $user_post_term = get_term_by('slug', $_POST['occupation'], 'occupation_type');
+    wp_set_post_terms($user_post->ID, array($user_post_term->term_id), 'occupation_type');
+
     print_r($_POST);
+
     wp_die();
   }
 
@@ -310,6 +351,104 @@ class User_registration_process
   public function user_bio_list_function()
   {
     include(URF_PLUGIN_PATH . '/includes/template-parts/user-bio-table.php');
+  }
+
+  /*Filter User Bio Data */
+  public function filter_user_data()
+  {
+    if (isset($_POST['filter_value'])) {
+      if ($_POST['filter_value'] != '') {
+        //Show on the basis of value selected
+        $query_array = ['post_type' => 'user_bio', 'posts_per_page' => -1, 'post_status' => [$_POST['filter_value']], 'orderby' => 'post_title'];
+      } else {
+        //Show All
+        $query_array = ['post_type' => 'user_bio', 'posts_per_page' => -1, 'orderby' => 'post_title'];
+      }
+    }
+    $user_list = new WP_Query($query_array);
+    if ($user_list->have_posts()): ?>
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Phone</th>
+            <th>Occupation</th>
+            <th>Exp in yrs.</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php
+          while ($user_list->have_posts()):
+            $user_list->the_post();
+            $meta = get_post_meta(get_the_ID());
+            $submit_date_val = isset($meta['submit_date'][0]) ? $meta['submit_date'][0] : '';
+            $name_val = isset($meta['name'][0]) ? $meta['name'][0] : '';
+            $address_val = isset($meta['address'][0]) ? $meta['address'][0] : '';
+            $phone_val = isset($meta['phone'][0]) ? $meta['phone'][0] : '';
+            $experience_val = isset($meta['experience'][0]) ? $meta['experience'][0] : '';
+            $status = get_post_status(get_the_ID()); ?>
+            <tr>
+              <td>
+                <?= $submit_date_val; ?>
+              </td>
+              <td>
+                <?php the_title(); ?>
+              </td>
+              <td>
+                <?= $name_val; ?>
+              </td>
+              <td>
+                <?= $address_val; ?>
+              </td>
+              <td>
+                <?= $phone_val; ?>
+              </td>
+              <td>
+                <?php
+                $terms = get_the_terms(get_the_ID(), 'occupation_type');
+                $counter = 1;
+                foreach ($terms as $term) {
+                  if ($counter > 1)
+                    echo ',';
+                  echo $term->name;
+                  $counter++;
+                } ?>
+              </td>
+              <td>
+                <?= $experience_val; ?>
+              </td>
+              <td>
+                <?php if ($status == 'pending') {
+                  echo 'Pending Request';
+                } elseif ($status == 'publish') {
+                  echo 'Verified Request';
+                } else {
+                  echo '-';
+                } ?>
+              </td>
+              <td><button id="CSV-<?= get_the_ID(); ?>" type="button" class="csv-download">Export CSV</button></td>
+            </tr>
+            <?php
+          endwhile;
+          wp_reset_postdata(); ?>
+        </tbody>
+      </table>
+      <?php
+    else:
+      echo '<h3 style="text-align:center;">No Results Found</h3>';
+    endif;
+    wp_die();
+  }
+
+  /*CSV Export Function */
+  public function user_csv_export()
+  {
+    wp_die();
   }
 }
 

@@ -17,25 +17,25 @@ if (!function_exists('add_action')) {
 }
 
 //On Plugin Activation
-function user_information_plugin_activation()
+function urf_user_information_plugin_activation()
 {
-  user_information_plugin_before_setup(); //Call plugin setup function 
+  urf_user_information_plugin_before_setup(); //Call plugin setup function 
   flush_rewrite_rules(); //When the user activates and deactivates the changes associated are performbed 
 
 }
-register_activation_hook(__FILE__, 'user_information_plugin_activation');
+register_activation_hook(__FILE__, 'urf_user_information_plugin_activation');
 
 
 //On Plugin Deactication
-function user_information_plugin_deactivation()
+function urf_user_information_plugin_deactivation()
 {
 
   flush_rewrite_rules(); //Flush Rewrite Rules
 
 }
-register_deactivation_hook(__FILE__, 'user_information_plugin_deactivation');
+register_deactivation_hook(__FILE__, 'urf_user_information_plugin_deactivation');
 
-function user_information_plugin_before_setup()
+function urf_user_information_plugin_before_setup()
 {
 
   define('URF_PLUGIN_PATH', plugin_dir_path(__FILE__));
@@ -51,4 +51,4 @@ function user_information_plugin_before_setup()
   include(URF_PLUGIN_PATH . '/includes/design-template.php');
 
 }
-add_action('plugins_loaded', 'user_information_plugin_before_setup');
+add_action('plugins_loaded', 'urf_user_information_plugin_before_setup');

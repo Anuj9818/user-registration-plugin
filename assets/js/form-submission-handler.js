@@ -1,4 +1,3 @@
-// console.log(ajax_url);
 /*---------------------------------Login & Registration Form JS---------------------------------------------------------*/
 //Disable Submit
 $('.register-submit').attr('disabled', 'disabled');
@@ -19,7 +18,7 @@ $("#user_login_form").submit(function (event) {
   event.preventDefault();
   var email = $('#user-login-email').val();
   var password = $('#user-login-password').val();
-  var nonce_check = $('#login-form-nonce').val();
+  var login_nonce_check = $('#login-form-nonce').val();
   var delay = 500;
   $.ajax({
     type: "post",
@@ -28,14 +27,14 @@ $("#user_login_form").submit(function (event) {
       action: 'login_submit_function',
       email: email,
       password: password,
-      nonce_check: nonce_check
+      login_nonce_check: login_nonce_check
     },
     error: function (err) {
       console.log(err);
     },
     success: function (response) {
       setTimeout(function () {
-        console.log(response);
+        //console.log(response);
         window.location.replace(response);
       }, delay);
     },
@@ -55,7 +54,7 @@ $("#user_registration_form").submit(function (event) {
   event.preventDefault();
   var email = $('#user-email').val();
   var password = $('#user-password').val();
-  var nonce_check = $('#register-form-nonce').val();
+  var register_nonce_check = $('#register-form-nonce').val();
   var delay = 500;
   $.ajax({
     type: "post",
@@ -64,14 +63,14 @@ $("#user_registration_form").submit(function (event) {
       action: 'registration_submit_function',
       email: email,
       password: password,
-      nonce_check: nonce_check
+      register_nonce_check: register_nonce_check
     },
     error: function (err) {
       console.log(err);
     },
     success: function (response) {
       setTimeout(function () {
-        console.log(response);
+        //console.log(response);
         window.location.replace(ajax_url[1] + "/urf-user-registration-bio-page/");
       }, delay);
     },
@@ -82,35 +81,38 @@ $("#user_registration_form").submit(function (event) {
 //User Bio Form Submission
 $("#user_registration_bio_form").submit(function (event) {
   event.preventDefault();
+  var submit_date = $('#bio-submit-date').val();
   var name = $('#name').val();
   var address = $('#address').val();
   var phone = $('#phone').val();
-  var email = $('#email').val();
   var about = $('#about').val();
   var occupation = $('#occupation').val();
   var experience = $('#years_of_experience').val();
   var education = $('#education').val();
-  var nonce_check = $('#register-bio-form-nonce').val();
+  var register_bio_nonce_check = $('#register-bio-form-nonce').val();
+  console.log(submit_date);
   $.ajax({
     type: "post",
     url: ajax_url[0],
     data: {
       action: 'registration_bio_form_submit_function',
+      submit_date: submit_date,
       name: name,
-      email: email,
       address: address,
       phone: phone,
       about: about,
       occupation: occupation,
       experience: experience,
       education: education,
-      nonce_check: nonce_check
+      register_bio_nonce_check: register_bio_nonce_check
     },
     error: function (err) {
       console.log(err);
     },
     success: function (response) {
-      console.log(response);
+      //console.log(response);
+      $('#user_registration_bio_form').remove();
+      $('.user-registration-bio-section').fadeIn().append('<h2 style="text-align:center;">Thank you for your response. We will get in touch with you shortly.</h2>');
     },
   });
 });
@@ -127,7 +129,7 @@ $("#user-re-password").keyup(function () {
     $('.passowrd-check-ok').css({ 'display': 'block' });
     $('.register-submit').removeAttr('disabled');
   }
-  console.log(re_password);
+  //console.log(re_password);
 });
 
 /*---------------------------------Login & Registration Form JS---------------------------------------------------------*/
