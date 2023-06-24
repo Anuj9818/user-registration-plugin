@@ -1,284 +1,316 @@
 <?php
 
-class User_registration_design
-{
-  function __construct()
+if (!class_exists('User_registration_design')):
+  class User_registration_design
   {
-    //Create Login Form
-    $this->create_login_form();
+    function __construct()
+    {
+      //Create Login Form
+      $this->create_login_form();
 
-    //Create User Registration Page 
-    $this->create_registration_form_bio_page();
+      //Create User Registration Page 
+      $this->create_registration_form_bio_page();
 
-    //Redirect User to Login Form
-    add_action('init', array($this, 'redirect_login_form'));
+      //Redirect User to Login Form
+      add_action('init', array($this, 'redirect_login_form'));
 
-    //Add Post States for User Registration Page
-    add_filter('display_post_states', array($this, 'user_registration_post_state'), 10, 2);
+      //Add Post States for User Registration Page
+      add_filter('display_post_states', array($this, 'user_registration_post_state'), 10, 2);
 
-    //Enqueue Style and Scripts for User Registration Page
-    add_action('wp_enqueue_scripts', array($this, 'user_registration_styles'));
+      //Enqueue Style and Scripts for User Registration Page
+      add_action('wp_enqueue_scripts', array($this, 'user_registration_styles'));
 
-  }
-
-  /*Create Login Custom Form Page*/
-  public function create_login_form()
-  {
-    $page_slug = 'urf-user-login-form-page'; // Slug of the Post
-    $page_content = "";
-    if (isset($_GET['login_check'])) {
-      if ($_GET['login_check'] == 'no') {
-        $page_content = '
-          <style>
-            .user-login-form-section .form-elements-container .form-element .passowrd-check-err{
-              display: block;
-            }
-          </style>';
-      }
     }
-    $page_content .= '
-      <div class="login-register">
-        <div class="login-wrapper">
-          <a class="login-form" href="javascript:void(0)">Login</a>
-        </div>
-        <div class="register-wrapper">
-          <a class="register-form" href="javascript:void(0)">Register</a>
-        </div>
-      </div>
-      <div class="user-registration-form-section">
-        <form action="' . esc_url(home_url('/')) . '" method="post" id="user_registration_form">
-          <h3>Registration Form</h3><br>
-          <div class="form-elements-container">
-            <div class="form-element form-group">
-              <label for="username">Enter Your Email</label>
-              <input id="user-email" type="email" class="form-control" name="user-email" placeholder="" required>
-            </div>
-            <div class="form-element form-group">
-              <label for="password">Enter Your Password</label>
-              <input id="user-password" type="password" class="form-control" name="password" minlength="8" placeholder="" required>
-            </div>
-            <div class="form-element form-group">
-              <label for="password">Re-enter Your Password</label>
-              <input id="user-re-password" type="password" class="form-control" name="re-password" minlength="8" placeholder="" required>
-              <p class="passowrd-check-err">Passwords do not match. Please re-enter. </p>
-              <p class="passowrd-check-ok">Passwords matched.</p>
-            </div>
-            <div class="form-element form-group">
-              <input id="register-form-nonce" type="hidden" name="register_ajax_nonce" value="' . wp_create_nonce('register_ajax_nocne_value') . '">
-              <input name="register-submit" class="btn btn-warning submit-btn register-submit" type="submit" value="Register" name="register-submit">
-            </div>
-          </div>
-        </form>
-      </div>
-      <div class="user-login-form-section">
-        <form action="' . esc_url(home_url('/')) . '" method="post" id="user_login_form">
-          <h3>Login Form</h3><br>
-          <div class="form-elements-container">
-            <div class="form-element form-group">
-              <label for="username">Enter Your Email</label>
-              <input id="user-login-email" type="email" class="form-control" name="user-email" placeholder="" required>
-            </div>
-            <div class="form-element form-group">
-              <label for="password">Enter Your Password</label>
-              <input id="user-login-password" type="password" class="form-control" name="password" minlength="8" placeholder="" required>
-            </div>
-            <div class="form-element form-group">
-              <p class="passowrd-check-err">Username or Password Incorrect.</p>
-              <input id="login-form-nonce" type="hidden" name="login_ajax_nonce" value="' . wp_create_nonce('ajax_login_nocne_value') . '">
-              <input name="login-submit" class="btn btn-warning submit-btn login-submit" type="submit" name="login-submit" value="Log In">
-            </div>
-          </div>
-        </form>
-      </div>';
-    $new_page = array(
-      'post_type' => 'page',
-      'post_title' => 'User Login Page',
-      'post_content' => $page_content,
-      'post_status' => 'publish',
-      'post_name' => $page_slug // Slug of the Post
-    );
 
-    if (!get_page_by_path($page_slug, OBJECT, 'page')) { // Check If Page Not Exits
-      $new_page_id = wp_insert_post($new_page);
-    }
-    // else {
-    //   $created_page = get_page_by_path($page_slug);
-    //   $update_post = array(
-    //     'ID' => $created_page->ID,
-    //     'post_content' => $page_content,
-    //   );
-
-    //   // Update the post into the database
-    //   wp_update_post($update_post);
-    // }
-  }
-
-  /* Auto create a User Registration Form Bio Page after Login/Register  */
-  public function create_registration_form_bio_page()
-  {
-    $page_slug = 'urf-user-registration-bio-page'; // Slug of the Post
-    $current_date = date('Y-m-d');
-
-    $page_content = '
-      <div class="user-registration-bio-section">
-        <form action="' . esc_url(home_url('/')) . '" autocomplete="off" method="post"
-          id="user_registration_bio_form">
-          <h3>Personal Information</h3>
-          <div class="form-elements-container">
-            <div class="form-element form-group">
-              <input type="text" class="form-control" name="name" id="name" placeholder="Enter your Full Name" required>
-            </div>
-            <div class="form-element form-group">
-              <input type="text" class="form-control" name="address" id="address" placeholder="Enter your Address" required>
-            </div>                
-            <div class="form-element form-group">
-              <input type="text" class="form-control" name="phone" id="phone" maxlength="10" placeholder="Enter your Contact Number" required>
-            </div>
-
-            <div class="form-element form-group">
-              <textarea id="about" placeholder="Something about yourself..." class="form-control" name="about" rows="4" cols="50" required></textarea>
-            </div> 
-
-          </div><br>
-
-          <h3>Professional Experience</h3>
-          <div class="form-elements-container">
-            <div class="form-element form-group" style="height:60px;">
-
-              <select name="occupation" id="occupation" class="form-control" required>
-                <option value="">Select your Occupation Type</option>';
-    $terms = get_terms(['occupation_type', 'hide_empty' => false]);
-    if (!empty($terms)) {
-      foreach ($terms as $term):
-        if ($term->taxonomy == 'occupation_type') {
-          $term_children = get_term_children($term->term_id, 'occupation_type');
-          $page_content .= '<option value="' . $term->slug . '">' . $term->name . '</option>';
-          if (!empty($term_children) && !is_wp_error($term_children)) {
-            foreach ($term_children as $child):
-              $page_content .= '<option value="' . $child->slug . '">' . $child->name . '</option>';
-            endforeach;
-          }
+    /*Create Login Custom Form Page*/
+    public function create_login_form()
+    {
+      $page_slug = 'urf-user-login-form-page'; // Slug of the Post
+      $page_content = "";
+      if (isset($_GET['login_check'])) {
+        if ($_GET['login_check'] == 'no') {
+          $page_content = '
+            <style>
+              .user-login-form-section .form-elements-container .form-element .passowrd-check-err{
+                display: block;
+              }
+            </style>';
         }
-      endforeach;
-    }
-    $page_content .= '
-              </select>
-            </div>
-
-            <div class="form-element form-group">
-              <input class="form-control" type="number" id="years_of_experience" name="years_of_experience" min="1"  max="15" placeholder="Total Years of Experience" required>
-            </div>
-          
+      }
+      $page_content .= '
+        <div class="login-register">
+          <div class="login-wrapper">
+            <a class="login-form" href="javascript:void(0)">Login</a>
           </div>
-
-          <h3>Educational Background</h3>
-          <div class="form-elements-container">
-
-            <div class="form-element form-group">
-              <textarea id="education" placeholder="Enter your education background..." class="form-control" name="education" rows="4" cols="50" required></textarea>
-            </div>
-
-            <div class="form-element form-group">
-              <input id="register-bio-form-nonce" type="hidden" name="ajax_nonce" value="' . wp_create_nonce('ajax_nocne_value') . '">
-              <input id="bio-submit-date" type="hidden" name="bio-submit-date"  value="' . $current_date . '">
-              <input name="bio-submit" class="btn btn-warning submit-btn" type="submit" name="Submit">
-            </div>
-
+          <div class="register-wrapper">
+            <a class="register-form" href="javascript:void(0)">Register</a>
           </div>
-        </form>         
-      </div>';
+        </div>
+        <div class="user-registration-form-section">
+          <form action="' . esc_url(home_url('/')) . '" method="post" id="user_registration_form">
+            <h3>Registration Form</h3><br>
+            <div class="form-elements-container">
+              <div class="form-element form-group">
+                <label for="username">Enter Your Email</label>
+                <input id="user-email" type="email" class="form-control" name="user-email" placeholder="" required>
+              </div>
+              <div class="form-element form-group">
+                <label for="password">Enter Your Password</label>
+                <input id="user-password" type="password" class="form-control" name="password" minlength="8" placeholder="" required>
+              </div>
+              <div class="form-element form-group">
+                <label for="password">Re-enter Your Password</label>
+                <input id="user-re-password" type="password" class="form-control" name="re-password" minlength="8" placeholder="" required>
+                <p class="passowrd-check-err">Passwords do not match. Please re-enter. </p>
+                <p class="passowrd-check-ok">Passwords matched.</p>
+              </div>
+              <div class="form-element form-group">
+                <input id="register-form-nonce" type="hidden" name="register_ajax_nonce" value="' . wp_create_nonce('register_ajax_nocne_value') . '">
+                <input name="register-submit" class="btn btn-warning submit-btn register-submit" type="submit" value="Register" name="register-submit">
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="user-login-form-section">
+          <form action="' . esc_url(home_url('/')) . '" method="post" id="user_login_form">
+            <h3>Login Form</h3><br>
+            <div class="form-elements-container">
+              <div class="form-element form-group">
+                <label for="username">Enter Your Email</label>
+                <input id="user-login-email" type="email" class="form-control" name="user-email" placeholder="" required>
+              </div>
+              <div class="form-element form-group">
+                <label for="password">Enter Your Password</label>
+                <input id="user-login-password" type="password" class="form-control" name="password" minlength="8" placeholder="" required>
+              </div>
+              <div class="form-element form-group">
+                <p class="passowrd-check-err">Username or Password Incorrect.</p>
+                <input id="login-form-nonce" type="hidden" name="login_ajax_nonce" value="' . wp_create_nonce('ajax_login_nocne_value') . '">
+                <input name="login-submit" class="btn btn-warning submit-btn login-submit" type="submit" name="login-submit" value="Log In">
+              </div>
+            </div>
+          </form>
+        </div>';
+      $new_page = array(
+        'post_type' => 'page',
+        'post_title' => 'User Login Page',
+        'post_content' => $page_content,
+        'post_status' => 'publish',
+        'post_name' => $page_slug // Slug of the Post
+      );
 
-    $new_page = array(
-      'post_type' => 'page',
-      'post_title' => 'User Registration Page',
-      'post_content' => $page_content,
-      'post_status' => 'publish',
-      'post_name' => $page_slug // Slug of the Post
-    );
+      if (!get_page_by_path($page_slug, OBJECT, 'page')) { // Check If Page Not Exits
+        $new_page_id = wp_insert_post($new_page);
+      }
+      // else {
+      //   $created_page = get_page_by_path($page_slug);
+      //   $update_post = array(
+      //     'ID' => $created_page->ID,
+      //     'post_content' => $page_content,
+      //   );
 
-    if (!get_page_by_path($page_slug, OBJECT, 'page')) { // Check If Page Not Exits
-      $new_page_id = wp_insert_post($new_page);
+      //   // Update the post into the database
+      //   wp_update_post($update_post);
+      // }
     }
-    // else {
-    //   $created_page = get_page_by_path($page_slug);
-    //   $update_post = array(
-    //     'ID' => $created_page->ID,
-    //     'post_content' => $page_content,
-    //   );
 
-    //   // Update the post into the database
-    //   wp_update_post($update_post);
+    /* Auto create a User Registration Form Bio Page after Login/Register  */
+    public function create_registration_form_bio_page()
+    {
+      global $wpdb;
 
-    // }
-  }
+      $page_slug = 'urf-user-registration-bio-page'; // Slug of the Post
+      $current_date = date('Y-m-d');
 
-  /*Set Post State to User Registration Form For Differenciation */
-  function user_registration_post_state($post_states, $post)
-  {
+      $curr_user_id = get_current_user_id();
+      $user_login = get_user_meta($curr_user_id);
 
-    if ($post->post_name == 'urf-user-registration-bio-page') {
-      $post_states[] = 'User Registration Form Page By Anuj Shrestha';
+      //Get User Post ID by Current User Email/Nickname
+      $name_val = '';
+      $address_val = '';
+      $phone_val = '';
+      $about_val = '';
+      $experience_val = '';
+      $education_val = '';
+      if (isset($user_login['nickname'])) {
+        $user_post_id = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_title = '" . $user_login['nickname'][0] . "'");
+
+        $meta = get_post_meta($user_post_id);
+        if (isset($meta['name'][0]))
+          $name_val = $meta['name'][0];
+        if (isset($meta['address'][0]))
+          $address_val = $meta['address'][0];
+        if (isset($meta['phone'][0]))
+          $phone_val = $meta['phone'][0];
+        if (isset($meta['about'][0]))
+          $about_val = $meta['about'][0];
+        if (isset($meta['experience'][0]))
+          $experience_val = $meta['experience'][0];
+        if (isset($meta['education'][0]))
+          $education_val = $meta['education'][0];
+        //print_r($meta);
+      }
+      $page_content = '
+        <div class="user-registration-bio-section">
+          <form action="' . esc_url(home_url('/')) . '" autocomplete="off" method="post"
+            id="user_registration_bio_form">
+            <h3>Personal Information</h3>
+            <div class="form-elements-container">
+              <div class="form-element form-group">
+                <input type="text" class="form-control" name="name" id="name"  value="' . $name_val . '"placeholder="Enter your Full Name" required>
+              </div>
+              <div class="form-element form-group">
+                <input type="text" class="form-control" name="address" id="address" value="' . $address_val . '"placeholder="Enter your Address" required>
+              </div>                
+              <div class="form-element form-group">
+                <input type="text" class="form-control" name="phone" id="phone"  value="' . $phone_val . '" maxlength="10" placeholder="Enter your Contact Number" required>
+              </div>
+
+              <div class="form-element form-group">
+                <textarea id="about" placeholder="Something about yourself..." class="form-control" name="about" rows="4" cols="50" required> ' . $about_val . '</textarea>
+              </div> 
+
+            </div><br>
+
+            <h3>Professional Experience</h3>
+            <div class="form-elements-container">
+              <div class="form-element form-group" style="height:60px;">
+
+                <select name="occupation" id="occupation" class="form-control" required>
+                  <option value="">Select your Occupation Type</option>';
+      $terms = get_terms(['hide_empty' => false]);
+      if (!empty($terms)) {
+        foreach ($terms as $term):
+          if ($term->taxonomy == 'occupation_type') {
+            $term_children = get_term_children($term->term_id, 'occupation_type');
+            $page_content .= '<option value="' . $term->slug . '">' . $term->name . '</option>';
+            if (!empty($term_children) && !is_wp_error($term_children)) {
+              foreach ($term_children as $child):
+                $page_content .= '<option value="' . $child->slug . '">' . $child->name . '</option>';
+              endforeach;
+            }
+          }
+        endforeach;
+      }
+      $page_content .= '
+                </select>
+              </div>
+
+              <div class="form-element form-group">
+                <input class="form-control" type="number" id="years_of_experience"  value="' . $experience_val . '"name="years_of_experience" min="1"  max="15" placeholder="Total Years of Experience" required>
+              </div>
+            
+            </div>
+
+            <h3>Educational Background</h3>
+            <div class="form-elements-container">
+
+              <div class="form-element form-group">
+                <textarea id="education" placeholder="Enter your education background..." class="form-control" name="education" rows="4" cols="50" required>' . $education_val . '</textarea>
+              </div>
+
+              <div class="form-element form-group">
+                <input id="register-bio-form-nonce" type="hidden" name="ajax_nonce" value="' . wp_create_nonce('ajax_nocne_value') . '">
+                <input id="bio-submit-date" type="hidden" name="bio-submit-date"  value="' . $current_date . '">
+                <input name="bio-submit" class="btn btn-warning submit-btn" type="submit" name="Submit">
+              </div>
+
+            </div>
+          </form>         
+        </div>';
+
+      $new_page = array(
+        'post_type' => 'page',
+        'post_title' => 'User Registration Page',
+        'post_content' => $page_content,
+        'post_status' => 'publish',
+        'post_name' => $page_slug // Slug of the Post
+      );
+
+      if (!get_page_by_path($page_slug, OBJECT, 'page')) { // Check If Page Not Exits
+        $new_page_id = wp_insert_post($new_page);
+      }
+      // else {
+      //   $created_page = get_page_by_path($page_slug);
+      //   $update_post = array(
+      //     'ID' => $created_page->ID,
+      //     'post_content' => $page_content,
+      //   );
+
+      //   // Update the post into the database
+      //   wp_update_post($update_post);
+
+      // }
     }
-    if ($post->post_name == 'urf-user-login-form-page') {
-      $post_states[] = 'User Login Form Page By Anuj Shrestha';
+
+    /*Set Post State to User Registration Form For Differenciation */
+    function user_registration_post_state($post_states, $post)
+    {
+
+      if ($post->post_name == 'urf-user-registration-bio-page') {
+        $post_states[] = 'User Registration Form Page By Anuj Shrestha';
+      }
+      if ($post->post_name == 'urf-user-login-form-page') {
+        $post_states[] = 'User Login Form Page By Anuj Shrestha';
+      }
+
+      return $post_states;
     }
 
-    return $post_states;
-  }
+    /*Redirect User to Login Form first*/
+    public function redirect_login_form()
+    {
+      if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on')
+        $url = "https://";
+      else
+        $url = "http://";
 
-  /*Redirect User to Login Form first*/
-  public function redirect_login_form()
-  {
-    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on')
-      $url = "https://";
-    else
-      $url = "http://";
+      // Append the host(domain name, ip) to the URL.   
+      $url .= $_SERVER['HTTP_HOST'];
 
-    // Append the host(domain name, ip) to the URL.   
-    $url .= $_SERVER['HTTP_HOST'];
+      // Append the requested resource location to the URL   
+      $url .= $_SERVER['REQUEST_URI'];
+      $target_url_register = site_url() . '/urf-user-registration-bio-page/';
+      $redirect_register_page_url = site_url() . '/urf-user-login-form-page/';
 
-    // Append the requested resource location to the URL   
-    $url .= $_SERVER['REQUEST_URI'];
-    $target_url_register = site_url() . '/urf-user-registration-bio-page/';
-    $redirect_register_page_url = site_url() . '/urf-user-login-form-page/';
+      //Redirection from Registration Page for Logged Out Users
+      if ($target_url_register === $url) {
+        if (!is_user_logged_in()) {
+          wp_redirect($redirect_register_page_url);
+          exit;
+        }
+      }
 
-    //Redirection from Registration Page for Logged Out Users
-    if ($target_url_register === $url) {
-      if (!is_user_logged_in()) {
-        wp_redirect($redirect_register_page_url);
-        exit;
+      //Append the requested resource location to the URL   
+      $target_url_login = site_url() . '/urf-user-login-form-page/';
+      $redirect_login_page_url = site_url() . '/urf-user-registration-bio-page/';
+
+      //Redirection from Login Page  for Logged In Users
+      if ($target_url_login === $url) {
+        if (is_user_logged_in()) {
+          wp_redirect($redirect_login_page_url);
+          exit;
+        }
       }
     }
 
-    //Append the requested resource location to the URL   
-    $target_url_login = site_url() . '/urf-user-login-form-page/';
-    $redirect_login_page_url = site_url() . '/urf-user-registration-bio-page/';
+    /*Styles and Scripts for User Registration Page */
+    public function user_registration_styles()
+    {
+      $ver = date("Ymd h:i:s");
 
-    //Redirection from Login Page  for Logged In Users
-    if ($target_url_login === $url) {
-      if (is_user_logged_in()) {
-        wp_redirect($redirect_login_page_url);
-        exit;
+      if (is_page('urf-user-registration-bio-page') || is_page('urf-user-login-form-page')) {
+        wp_enqueue_style('urf-bootstrap', URF_PLUGIN_URL . 'assets/css/bootstrap.css', array(), $ver);
+        wp_enqueue_style('urf-main', URF_PLUGIN_URL . 'assets/css/main.css', array(), $ver);
+
+        $ajax_url = admin_url('admin-ajax.php');
+        wp_enqueue_script('urf-jQuery', URF_PLUGIN_URL . '/assets/js/custom-jquery.js', array(), '3.6.4', true);
+        wp_enqueue_script('urf-form-submission-handler', URF_PLUGIN_URL . '/assets/js/form-submission-handler.js', array('urf-jQuery'), '1.0', true);
+        wp_localize_script('urf-form-submission-handler', 'ajax_url', array($ajax_url, site_url()));
       }
     }
+
   }
 
-  /*Styles and Scripts for User Registration Page */
-  public function user_registration_styles()
-  {
-    $ver = date("Ymd h:i:s");
-
-    if (is_page('urf-user-registration-bio-page') || is_page('urf-user-login-form-page')) {
-      wp_enqueue_style('urf-bootstrap', URF_PLUGIN_URL . 'assets/css/bootstrap.css', array(), $ver);
-      wp_enqueue_style('urf-main', URF_PLUGIN_URL . 'assets/css/main.css', array(), $ver);
-
-      $ajax_url = admin_url('admin-ajax.php');
-      wp_enqueue_script('urf-jQuery', URF_PLUGIN_URL . '/assets/js/custom-jquery.js', array(), '3.6.4', true);
-      wp_enqueue_script('urf-form-submission-handler', URF_PLUGIN_URL . '/assets/js/form-submission-handler.js', array('urf-jQuery'), '1.0', true);
-      wp_localize_script('urf-form-submission-handler', 'ajax_url', array($ajax_url, site_url()));
-    }
-  }
-
-}
-
-new User_registration_design;
+  new User_registration_design;
+endif;

@@ -5,7 +5,7 @@ $(".csv-download").on('click', function (event) {
   event.stopPropagation();
   event.stopImmediatePropagation();
   var post_id = $(this).attr('id');
-  console.log(post_id);
+  // console.log(post_id);
   var delay = 1000;
   $.ajax({
     type: "post",
@@ -20,6 +20,18 @@ $(".csv-download").on('click', function (event) {
     success: function (response) {
       setTimeout(function () {
         console.log(response);
+        var a = document.createElement('a');
+        var binaryData = [];
+        binaryData.push(response);
+        var url = window.URL.createObjectURL(new Blob(binaryData, { type: "application/zip" }))
+        const date = new Date();
+        let timestamp = date.getTime();
+        a.href = url;
+        a.download = post_id + '-' + timestamp + '.csv';
+        document.body.append(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
       }, delay);
     },
   });
@@ -48,3 +60,38 @@ $('#status-filter').on('change', function (event) {
     },
   });
 });
+
+function downloadCSV(Id, event) {
+  event.preventDefault();
+  var post_id = Id;
+  // console.log(post_id);
+  var delay = 1000;
+  $.ajax({
+    type: "post",
+    url: ajax_url[0],
+    data: {
+      action: 'user_csv_export',
+      post_id: post_id
+    },
+    error: function (err) {
+      console.log(err);
+    },
+    success: function (response) {
+      setTimeout(function () {
+        console.log(response);
+        var a = document.createElement('a');
+        var binaryData = [];
+        binaryData.push(response);
+        var url = window.URL.createObjectURL(new Blob(binaryData, { type: "application/zip" }))
+        const date = new Date();
+        let timestamp = date.getTime();
+        a.href = url;
+        a.download = post_id + '-' + timestamp + '.csv';
+        document.body.append(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      }, delay);
+    },
+  });
+}

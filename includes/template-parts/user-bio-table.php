@@ -33,11 +33,11 @@
               while ($user_list->have_posts()):
                 $user_list->the_post();
                 $meta = get_post_meta(get_the_ID());
-                $submit_date_val = isset($meta['submit_date'][0]) ? $meta['submit_date'][0] : '';
-                $name_val = isset($meta['name'][0]) ? $meta['name'][0] : '';
-                $address_val = isset($meta['address'][0]) ? $meta['address'][0] : '';
-                $phone_val = isset($meta['phone'][0]) ? $meta['phone'][0] : '';
-                $experience_val = isset($meta['experience'][0]) ? $meta['experience'][0] : '';
+                $submit_date_val = isset($meta['submit_date'][0]) ? $meta['submit_date'][0] : '-';
+                $name_val = isset($meta['name'][0]) ? $meta['name'][0] : '-';
+                $address_val = isset($meta['address'][0]) ? $meta['address'][0] : '-';
+                $phone_val = isset($meta['phone'][0]) ? $meta['phone'][0] : '-';
+                $experience_val = isset($meta['experience'][0]) ? $meta['experience'][0] : '0';
                 $status = get_post_status(get_the_ID()); ?>
                 <tr>
                   <td>
@@ -59,11 +59,15 @@
                     <?php
                     $terms = get_the_terms(get_the_ID(), 'occupation_type');
                     $counter = 1;
-                    foreach ($terms as $term) {
-                      if ($counter > 1)
-                        echo ',';
-                      echo $term->name;
-                      $counter++;
+                    if (!empty($terms)) {
+                      foreach ($terms as $term) {
+                        if ($counter > 1)
+                          echo ',';
+                        echo $term->name;
+                        $counter++;
+                      }
+                    } else {
+                      echo '-';
                     } ?>
                   </td>
                   <td>
