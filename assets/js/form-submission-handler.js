@@ -113,6 +113,9 @@ $("#user_registration_bio_form").submit(function (event) {
       //console.log(response);
       $('#user_registration_bio_form').remove();
       $('.user-registration-bio-section').fadeIn().append('<h2 style="text-align:center;">Thank you for your response. We will get in touch with you shortly.</h2>');
+      setTimeout(function () {
+        window.location.replace(ajax_url[1]);
+      }, 1200);
     },
   });
 });

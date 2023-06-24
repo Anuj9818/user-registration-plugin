@@ -90,7 +90,7 @@ if (!class_exists('User_registration_process')):
         'menu_icon' => 'dashicons-screenoptions',
         'rewrite' => true,
         'public' => true,
-        'publicly_queryable' => false,
+        'publicly_queryable' => true,
         'show_ui' => true,
         'show_in_menu' => true,
         'show_in_nav_menus' => false,
@@ -99,7 +99,6 @@ if (!class_exists('User_registration_process')):
         'capabilities' => array(
           'create_posts' => false,
           'delete_published_posts' => false,
-          'delete_pending_posts' => false,
         ),
         'map_meta_cap' => true,
         'has_archive' => false,

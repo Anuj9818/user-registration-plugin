@@ -91,3 +91,8 @@
 .user-login-form-section {
   display: none;
 }
+
+.user-bio-view {
+  margin: 40px 0;
+  padding: 20px;
+}
