@@ -37,7 +37,7 @@ if (!class_exists('User_registration_process')):
       //Add Additional Option Under CPT Menu called User Bio List
       add_action('admin_menu', array($this, 'user_bio_list_panel'));
 
-      //AJAX User Data Filter
+      //AJAX CSV Export Function
       add_action('wp_ajax_filter_user_data', array($this, 'filter_user_data'));
       add_action('wp_ajax_nopriv_filter_user_data', array($this, 'filter_user_data'));
 
