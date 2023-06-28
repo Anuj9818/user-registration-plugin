@@ -49,6 +49,8 @@ function urf_user_information_plugin_before_setup()
   /* Frontend Templates */
 
   include(URF_PLUGIN_PATH . '/includes/classes/class-user-registration-design.php');
+  include(URF_PLUGIN_PATH . '/includes/shortcodes/registration-bio-form-contents.php');
+
 
 }
 add_action('plugins_loaded', 'urf_user_information_plugin_before_setup');

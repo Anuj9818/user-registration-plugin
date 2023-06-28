@@ -6,7 +6,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
   <link rel="stylesheet" href="<?php echo URF_PLUGIN_URL . 'assets/css/bootstrap.css'; ?>">
   <link rel="stylesheet" href="<?php echo URF_PLUGIN_URL . 'assets/css/main.css'; ?>">
 </head>
@@ -53,20 +52,20 @@
           </h3>
           <div class="form-elements-container">
             <div class="form-element form-group">
-              <input type="text" class="form-control" name="name" id="name" value="<?= $name_val; ?>"
+              <input type="text" class="name form-control" name="name" value="<?= $name_val; ?>"
                 placeholder="Enter your Full Name" required>
             </div>
             <div class="form-element form-group">
-              <input type="text" class="form-control" name="address" id="address" value="<?= $address_val; ?>"
+              <input type="text" class="form-control address" name="address" value="<?= $address_val; ?>"
                 placeholder="Enter your Address" required>
             </div>
             <div class="form-element form-group">
-              <input type="text" class="form-control" name="phone" id="phone" value="<?= $phone_val; ?>" maxlength="10"
+              <input type="text" class="form-control phone" name="phone" value="<?= $phone_val; ?>" maxlength="10"
                 placeholder="Enter your Contact Number" required>
             </div>
 
             <div class="form-element form-group">
-              <textarea id="about" placeholder="Something about yourself..." class="form-control" name="about" rows="4"
+              <textarea placeholder="Something about yourself..." class="form-control about" name="about" rows="4"
                 cols="50" required><?= $about_val; ?></textarea>
             </div>
 
@@ -76,7 +75,7 @@
           <div class="form-elements-container">
             <div class="form-element form-group" style="height:60px;">
 
-              <select name="occupation" id="occupation" class="form-control" required>
+              <select name="occupation" class="form-control occupation" required>
                 <option value="">Select your Occupation Type</option>
                 <?php
                 $terms = get_terms(['hide_empty' => false]);
@@ -96,7 +95,7 @@
             </div>
 
             <div class="form-element form-group">
-              <input class="form-control" type="number" id="years_of_experience" value="<?= $experience_val; ?>"
+              <input class="form-control years_of_experience" type="number" value="<?= $experience_val; ?>"
                 name="years_of_experience" min="1" max="15" placeholder="Total Years of Experience" required>
             </div>
 
@@ -106,12 +105,12 @@
           <div class="form-elements-container">
 
             <div class="form-element form-group">
-              <textarea id="education" placeholder="Enter your education background..." class="form-control"
+              <textarea placeholder="Enter your education background..." class=" education form-control"
                 name="education" rows="4" cols="50" required><?= $education_val; ?></textarea>
             </div>
 
             <div class="form-element form-group">
-              <input id="bio-submit-date" type="hidden" name="bio-submit-date" value="<?= $current_date; ?>">
+              <input class="bio-submit-date" type="hidden" name="bio-submit-date" value="<?= $current_date; ?>">
               <input name="bio-submit" class="btn btn-warning submit-btn" type="submit" name="Submit">
             </div>
           </div>
@@ -127,15 +126,15 @@
     function submitForm(post_id, event) {
       event.preventDefault();
       var url = '<?php echo $ajax_url[0]; ?>';
-      var submit_date = $('#bio-submit-date').val();
-      var name = $('#name').val();
-      var address = $('#address').val();
-      var phone = $('#phone').val();
-      var about = $('#about').val();
-      var occupation = $('#occupation').val();
-      var experience = $('#years_of_experience').val();
-      var education = $('#education').val();
-      var register_bio_nonce_check = $('#register-bio-form-nonce').val();
+      var submit_date = $('.bio-submit-date').val();
+      var name = $('.name').val();
+      var address = $('.address').val();
+      var phone = $('.phone').val();
+      var about = $('.about').val();
+      var occupation = $('.occupation').val();
+      var experience = $('.years_of_experience').val();
+      var education = $('.education').val();
+      var register_bio_nonce_check = $('.register-bio-form-nonce').val();
       console.log(submit_date);
       $.ajax({
         type: "post",
